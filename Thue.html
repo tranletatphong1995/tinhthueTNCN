@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Công Cụ Tính Thuế Thu Nhập Cá Nhân</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .tab-btn {
+            transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .tab-btn.active {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            background-color: #eff6ff;
+        }
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .result-box {
+            background-color: #f0f9ff;
+            border-left: 4px solid #3b82f6;
+            transition: all 0.3s ease;
+        }
+        /* Hide number input arrows */
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        input[type=number] {
+            -moz-appearance: textfield;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+    <div class="container mx-auto p-4 md:p-8 max-w-4xl">
+        <header class="text-center mb-8">
+            <h1 class="text-3xl md:text-4xl font-bold text-blue-600">Công Cụ Tính Thuế Thu Nhập Cá Nhân</h1>
+            <p class="text-gray-600 mt-2">Tính toán nhanh chóng và chính xác các loại thuế TNCN theo quy định.</p>
+        </header>
+
+        <!-- Tab Navigation -->
+        <div class="mb-6 overflow-x-auto pb-2">
+            <div class="border-b border-gray-200">
+                <nav class="-mb-px flex space-x-2 sm:space-x-4" aria-label="Tabs">
+                    <button class="tab-btn active whitespace-nowrap py-3 px-3 sm:px-4 border-b-2 font-medium text-sm text-gray-500 hover:text-blue-600 hover:border-blue-300" data-tab="salary">Tiền Lương, Tiền Công</button>
+                    <button class="tab-btn whitespace-nowrap py-3 px-3 sm:px-4 border-b-2 font-medium text-sm text-gray-500 hover:text-blue-600 hover:border-blue-300" data-tab="business">Kinh Doanh</button>
+                    <button class="tab-btn whitespace-nowrap py-3 px-3 sm:px-4 border-b-2 font-medium text-sm text-gray-500 hover:text-blue-600 hover:border-blue-300" data-tab="investment">Đầu Tư & Chuyển Nhượng</button>
+                    <button class="tab-btn whitespace-nowrap py-3 px-3 sm:px-4 border-b-2 font-medium text-sm text-gray-500 hover:text-blue-600 hover:border-blue-300" data-tab="other">Thu Nhập Khác</button>
+                    <button class="tab-btn whitespace-nowrap py-3 px-3 sm:px-4 border-b-2 font-medium text-sm text-gray-500 hover:text-blue-600 hover:border-blue-300" data-tab="non-resident">Không Cư Trú</button>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Tab Content -->
+        <div id="tab-content-container">
+            <!-- 1. Thu nhập từ tiền lương, tiền công -->
+            <div id="salary" class="tab-content active space-y-6">
+                <div class="bg-white p-5 sm:p-6 rounded-lg shadow-md">
+                    <h2 class="text-xl font-semibold mb-4 text-blue-700">I. Thu Nhập Từ Tiền Lương, Tiền Công</h2>
+                    <form id="salary-form" class="space-y-6">
+                        <div>
+                            <label for="total-income" class="block text-sm font-medium text-gray-700">Tổng thu nhập (VND/tháng)</label>
+                            <input type="text" id="total-income" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="VD: 30,000,000">
+                        </div>
+                        <div>
+                            <label for="exempt-income" class="block text-sm font-medium text-gray-700">Các khoản được miễn thuế (VND/tháng)</label>
+                            <input type="text" id="exempt-income" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="VD: 0" value="0">
+                        </div>
+                        
+                        <!-- New Deduction Section -->
+                        <div class="space-y-4 rounded-md border border-gray-200 p-4">
+                            <h3 class="text-lg font-medium leading-6 text-gray-900">Các Khoản Giảm Trừ</h3>
+                            
+                            <div class="flex items-center justify-between bg-gray-50 p-3 rounded-md">
+                                <p class="text-sm font-medium text-gray-700">Giảm trừ cho bản thân</p>
+                                <p class="text-sm font-semibold text-gray-900">11,000,000 VND</p>
+                            </div>
+                            
+                            <div class="relative flex items-start">
+                                <div class="flex h-6 items-center">
+                                    <input id="has-dependents" name="has-dependents" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                </div>
+                                <div class="ml-3 text-sm leading-6">
+                                    <label for="has-dependents" class="font-medium text-gray-800">Giảm trừ cho người phụ thuộc</label>
+                                    <div id="dependents-input-container" class="mt-2 hidden">
+                                        <label for="dependents" class="sr-only">Số người phụ thuộc</label>
+                                        <input type="number" id="dependents" class="block w-full max-w-xs rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" placeholder="Nhập số người" min="0">
+                                        <p class="text-xs text-gray-500 mt-1">Mức giảm trừ: 4,400,000 VND/người</p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="relative flex items-start">
+                                <div class="flex h-6 items-center">
+                                    <input id="has-insurance" name="has-insurance" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                                </div>
+                                <div class="ml-3 text-sm leading-6">
+                                    <label for="has-insurance" class="font-medium text-gray-800">Bảo hiểm bắt buộc (BHXH, BHYT, BHTN)</label>
+                                    <div id="insurance-input-container" class="mt-2 hidden">
+                                        <label for="insurance" class="sr-only">Số tiền bảo hiểm</label>
+                                        <input type="text" id="insurance" class="block w-full max-w-xs rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm" placeholder="Nhập tổng số tiền">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Tính Thuế TNCN</button>
+                    </form>
+                    <div id="salary-result" class="mt-6 p-4 rounded-md result-box" style="display: none;"></div>
+                </div>
+            </div>
+
+            <!-- Other tabs -->
+            <div id="business" class="tab-content space-y-6"><div class="bg-white p-5 sm:p-6 rounded-lg shadow-md"><h2 class="text-xl font-semibold mb-4 text-blue-700">II. Thu Nhập Từ Hoạt Động Kinh Doanh</h2><form id="business-form" class="space-y-4"><div><label for="business-revenue" class="block text-sm font-medium text-gray-700">Doanh thu tính thuế (VND)</label><input type="text" id="business-revenue" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="VD: 100,000,000"></div><div><label for="business-type" class="block text-sm font-medium text-gray-700">Loại hình kinh doanh</label><select id="business-type" class="mt-1 block w-full pl-3 pr-10 py-2 text-base border-gray-300 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm rounded-md"><option value="0.005">Phân phối, cung cấp hàng hóa (0.5%)</option><option value="0.02">Dịch vụ, xây dựng không bao thầu (2%)</option><option value="0.015">Sản xuất, vận tải, dịch vụ có nguyên liệu (1.5%)</option><option value="0.01">Hoạt động khác (1%)</option></select></div><button type="submit" class="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Tính Thuế TNCN</button></form><div id="business-result" class="mt-6 p-4 rounded-md result-box" style="display: none;"></div></div></div>
+            <div id="investment" class="tab-content space-y-6"><div class="bg-white p-5 sm:p-6 rounded-lg shadow-md"><h2 class="text-xl font-semibold mb-4 text-blue-700">III. Chuyển Nhượng Chứng Khoán</h2><form id="securities-form" class="space-y-4"><div><label for="securities-value" class="block text-sm font-medium text-gray-700">Giá trị chuyển nhượng (VND)</label><input type="text" id="securities-value" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="VD: 50,000,000"></div><button type="submit" class="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Tính Thuế</button></form><div id="securities-result" class="mt-6 p-4 rounded-md result-box" style="display: none;"></div></div><div class="bg-white p-5 sm:p-6 rounded-lg shadow-md"><h2 class="text-xl font-semibold mb-4 text-blue-700">IV. Chuyển Nhượng Bất Động Sản</h2><form id="real-estate-form" class="space-y-4"><div><label for="real-estate-price" class="block text-sm font-medium text-gray-700">Giá chuyển nhượng (VND)</label><input type="text" id="real-estate-price" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="VD: 2,000,000,000"></div><div class="flex items-center"><input id="only-property" type="checkbox" class="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"><label for="only-property" class="ml-2 block text-sm text-gray-900">Đây là nhà đất duy nhất của tôi</label></div><button type="submit" class="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Tính Thuế</button></form><div id="real-estate-result" class="mt-6 p-4 rounded-md result-box" style="display: none;"></div></div><div class="bg-white p-5 sm:p-6 rounded-lg shadow-md"><h2 class="text-xl font-semibold mb-4 text-blue-700">V. Đầu Tư Vốn</h2><form id="capital-form" class="space-y-4"><div><label for="capital-income" class="block text-sm font-medium text-gray-700">Thu nhập từ đầu tư vốn (lãi, cổ tức...) (VND)</label><input type="text" id="capital-income" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="VD: 10,000,000"></div><button type="submit" class="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Tính Thuế</button></form><div id="capital-result" class="mt-6 p-4 rounded-md result-box" style="display: none;"></div></div></div>
+            <div id="other" class="tab-content space-y-6"><div class="bg-white p-5 sm:p-6 rounded-lg shadow-md"><h2 class="text-xl font-semibold mb-4 text-blue-700">VI. Bản Quyền, Nhượng Quyền</h2><form id="copyright-form" class="space-y-4"><div><label for="copyright-income" class="block text-sm font-medium text-gray-700">Thu nhập từ bản quyền, nhượng quyền (VND)</label><input type="text" id="copyright-income" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="VD: 20,000,000"></div><button type="submit" class="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Tính Thuế</button></form><div id="copyright-result" class="mt-6 p-4 rounded-md result-box" style="display: none;"></div></div><div class="bg-white p-5 sm:p-6 rounded-lg shadow-md"><h2 class="text-xl font-semibold mb-4 text-blue-700">VII. Trúng Thưởng</h2><form id="winnings-form" class="space-y-4"><div><label for="winnings-income" class="block text-sm font-medium text-gray-700">Giá trị giải thưởng (VND)</label><input type="text" id="winnings-income" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="VD: 50,000,000"></div><button type="submit" class="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Tính Thuế</button></form><div id="winnings-result" class="mt-6 p-4 rounded-md result-box" style="display: none;"></div></div><div class="bg-white p-5 sm:p-6 rounded-lg shadow-md"><h2 class="text-xl font-semibold mb-4 text-blue-700">VIII. Thừa Kế, Quà Tặng</h2><form id="inheritance-form" class="space-y-4"><div><label for="inheritance-value" class="block text-sm font-medium text-gray-700">Giá trị tài sản nhận được (VND)</label><input type="text" id="inheritance-value" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="VD: 100,000,000"></div><button type="submit" class="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Tính Thuế</button></form><div id="inheritance-result" class="mt-6 p-4 rounded-md result-box" style="display: none;"></div></div></div>
+            <div id="non-resident" class="tab-content space-y-6"><div class="bg-white p-5 sm:p-6 rounded-lg shadow-md"><h2 class="text-xl font-semibold mb-4 text-blue-700">IX. Cá Nhân Không Cư Trú</h2><form id="non-resident-form" class="space-y-4"><div><label for="non-resident-income" class="block text-sm font-medium text-gray-700">Tổng thu nhập chịu thuế (VND)</label><input type="text" id="non-resident-income" class="mt-1 block w-full px-3 py-2 bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500" placeholder="VD: 50,000,000"></div><button type="submit" class="w-full bg-blue-600 text-white font-semibold py-3 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">Tính Thuế TNCN</button></form><div id="non-resident-result" class="mt-6 p-4 rounded-md result-box" style="display: none;"></div></div></div>
+        </div>
+         <footer class="text-center mt-10 text-sm text-gray-500">
+            <p>Lưu ý: Công cụ chỉ mang tính chất tham khảo. Vui lòng tham vấn chuyên gia để có thông tin chính xác nhất.</p>
+            <p class="mt-1">Hiểu đúng về thuế là trách nhiệm và nghĩa vụ giúp bạn bình an & phát triển bền vững!</p>
+        </footer>
+    </div>
+
+    <script>
+        // --- UTILITY FUNCTIONS ---
+        const formatCurrency = (num) => new Intl.NumberFormat('vi-VN').format(num);
+        const parseCurrency = (str) => {
+            if (typeof str !== 'string' || !str) return 0;
+            return Number(str.replace(/[,.]/g, ''));
+        };
+
+        const applyAutoFormatting = (inputId) => {
+            const input = document.getElementById(inputId);
+            if (input) {
+                input.addEventListener('input', (e) => { let value = e.target.value; let numValue = parseCurrency(value); if (isNaN(numValue)) { e.target.value = ''; } });
+                input.addEventListener('blur', (e) => { const value = parseCurrency(e.target.value); if (!isNaN(value) && value.toString().length > 0) { e.target.value = formatCurrency(value); } });
+                input.addEventListener('focus', (e) => { const value = parseCurrency(e.target.value); if (!isNaN(value) && value !== 0) { e.target.value = value; } else { e.target.value = ''; } });
+            }
+        };
+
+        const numericInputs = ['total-income', 'exempt-income', 'insurance', 'business-revenue', 'securities-value', 'real-estate-price', 'capital-income', 'copyright-income', 'winnings-income', 'inheritance-value', 'non-resident-income'];
+        numericInputs.forEach(applyAutoFormatting);
+
+        // --- TAB SWITCHING LOGIC ---
+        const tabs = document.querySelectorAll('.tab-btn');
+        const tabContents = document.querySelectorAll('.tab-content');
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tabContents.forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+        
+        // --- DEDUCTION TOGGLE LOGIC ---
+        const setupDeductionToggle = (checkboxId, containerId) => {
+            const checkbox = document.getElementById(checkboxId);
+            const container = document.getElementById(containerId);
+            if (checkbox && container) { checkbox.addEventListener('change', () => { container.classList.toggle('hidden', !checkbox.checked); }); }
+        };
+
+        setupDeductionToggle('has-dependents', 'dependents-input-container');
+        setupDeductionToggle('has-insurance', 'insurance-input-container');
+
+        // --- CALCULATION LOGIC ---
+
+        // 1. Salary Tax
+        document.getElementById('salary-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const totalIncome = parseCurrency(document.getElementById('total-income').value);
+            const exemptIncome = parseCurrency(document.getElementById('exempt-income').value);
+            const resultDiv = document.getElementById('salary-result');
+            
+            const hasDependents = document.getElementById('has-dependents').checked;
+            const dependentsCount = hasDependents ? parseInt(document.getElementById('dependents').value) || 0 : 0;
+            
+            const hasInsurance = document.getElementById('has-insurance').checked;
+            const insuranceAmount = hasInsurance ? parseCurrency(document.getElementById('insurance').value) : 0;
+
+            if (totalIncome <= 0) {
+                 resultDiv.innerHTML = `<p class="font-semibold text-red-600">Vui lòng nhập tổng thu nhập hợp lệ.</p>`;
+                 resultDiv.style.display = 'block';
+                 return;
+            }
+
+            const selfDeduction = 11000000;
+            const dependentDeductionTotal = dependentsCount * 4400000;
+            const taxableIncomeBeforeDeductions = totalIncome - exemptIncome;
+            const totalDeductions = selfDeduction + dependentDeductionTotal + insuranceAmount;
+            const finalTaxableIncome = Math.max(0, taxableIncomeBeforeDeductions - totalDeductions);
+            
+            let tax = 0;
+            let explanation = '';
+
+            if (finalTaxableIncome > 0) {
+                let incomeLeft = finalTaxableIncome;
+                let detailHtml = '<ul class="list-disc list-inside space-y-1 mt-2 text-sm">';
+                
+                if (incomeLeft > 80000000) { const taxPart = (incomeLeft - 80000000) * 0.35; tax += taxPart; detailHtml += `<li>Bậc 7: (${formatCurrency(incomeLeft)} - 80,000,000) × 35% = <b>${formatCurrency(taxPart.toFixed(0))}</b></li>`; incomeLeft = 80000000; }
+                if (incomeLeft > 52000000) { const taxPart = (incomeLeft - 52000000) * 0.30; tax += taxPart; detailHtml += `<li>Bậc 6: (${formatCurrency(incomeLeft)} - 52,000,000) × 30% = <b>${formatCurrency(taxPart.toFixed(0))}</b></li>`; incomeLeft = 52000000; }
+                if (incomeLeft > 32000000) { const taxPart = (incomeLeft - 32000000) * 0.25; tax += taxPart; detailHtml += `<li>Bậc 5: (${formatCurrency(incomeLeft)} - 32,000,000) × 25% = <b>${formatCurrency(taxPart.toFixed(0))}</b></li>`; incomeLeft = 32000000; }
+                if (incomeLeft > 18000000) { const taxPart = (incomeLeft - 18000000) * 0.20; tax += taxPart; detailHtml += `<li>Bậc 4: (${formatCurrency(incomeLeft)} - 18,000,000) × 20% = <b>${formatCurrency(taxPart.toFixed(0))}</b></li>`; incomeLeft = 18000000; }
+                if (incomeLeft > 10000000) { const taxPart = (incomeLeft - 10000000) * 0.15; tax += taxPart; detailHtml += `<li>Bậc 3: (${formatCurrency(incomeLeft)} - 10,000,000) × 15% = <b>${formatCurrency(taxPart.toFixed(0))}</b></li>`; incomeLeft = 10000000; }
+                if (incomeLeft > 5000000) { const taxPart = (incomeLeft - 5000000) * 0.10; tax += taxPart; detailHtml += `<li>Bậc 2: (${formatCurrency(incomeLeft)} - 5,000,000) × 10% = <b>${formatCurrency(taxPart.toFixed(0))}</b></li>`; incomeLeft = 5000000; }
+                if (incomeLeft > 0) { const taxPart = incomeLeft * 0.05; tax += taxPart; detailHtml += `<li>Bậc 1: ${formatCurrency(incomeLeft)} × 5% = <b>${formatCurrency(taxPart.toFixed(0))}</b></li>`; }
+                detailHtml += '</ul>';
+                explanation = detailHtml;
+            }
+            
+            const createRow = (label, value, labelClass = 'text-gray-600', valueClass = 'font-medium text-right') => {
+                return `<div class="flex justify-between items-baseline py-1">
+                            <span class="${labelClass}">${label}</span>
+                            <span class="${valueClass}">${value}</span>
+                        </div>`;
+            };
+
+            let deductionsHtml = '<div class="mt-3 space-y-1 text-sm">';
+            deductionsHtml += createRow('Thu nhập chịu thuế:', formatCurrency(taxableIncomeBeforeDeductions));
+            deductionsHtml += '<div class="border-t my-2"></div>';
+            deductionsHtml += '<p class="font-semibold text-gray-800">Các khoản giảm trừ:</p>';
+            deductionsHtml += '<div class="pl-2 space-y-1">';
+            deductionsHtml += createRow('&bull; Giảm trừ bản thân:', formatCurrency(selfDeduction));
+            if (dependentsCount > 0) {
+                deductionsHtml += createRow(`&bull; Người phụ thuộc (${dependentsCount} người):`, formatCurrency(dependentDeductionTotal));
+            }
+            if (insuranceAmount > 0) {
+                 deductionsHtml += createRow('&bull; Bảo hiểm bắt buộc:', formatCurrency(insuranceAmount));
+            }
+            deductionsHtml += '</div>';
+            deductionsHtml += '<div class="border-t my-2"></div>';
+            deductionsHtml += createRow('Tổng giảm trừ:', formatCurrency(totalDeductions), 'text-gray-600 font-semibold', 'font-semibold text-right');
+            deductionsHtml += createRow('Thu nhập tính thuế:', formatCurrency(finalTaxableIncome), 'text-gray-800 font-bold text-base', 'font-bold text-base text-right');
+            deductionsHtml += `</div>`;
+            
+            resultDiv.innerHTML = `
+                <h4 class="font-bold text-lg">Kết quả tính thuế (tháng):</h4>
+                ${deductionsHtml}
+                ${finalTaxableIncome > 0 ? `<div class="border-t my-3"></div><p class="font-semibold">Chi tiết các bậc thuế:</p>${explanation}` : ''}
+                <div class="mt-4 p-3 bg-blue-100 rounded-md text-center">
+                    <p class="text-sm text-blue-800">TỔNG SỐ THUẾ TNCN PHẢI NỘP</p>
+                    <p class="text-2xl font-bold text-blue-800">${formatCurrency(tax.toFixed(0))} VND</p>
+                </div>
+                ${finalTaxableIncome <= 0 ? '<p class="mt-3 text-green-700 font-semibold">Thu nhập tính thuế của bạn không dương, bạn không phải nộp thuế TNCN.</p>' : ''}
+            `;
+            resultDiv.style.display = 'block';
+        });
+        
+        // Other form submissions (no major changes needed for their simple results)
+        document.getElementById('business-form').addEventListener('submit', function(e) { e.preventDefault(); const revenue = parseCurrency(document.getElementById('business-revenue').value), rate = parseFloat(document.getElementById('business-type').value), resultDiv = document.getElementById('business-result'), tax = revenue * rate; resultDiv.innerHTML = `<h4 class="font-bold text-lg">Kết quả tính thuế:</h4><p class="mt-2 text-sm">Thuế TNCN = ${formatCurrency(revenue)} × ${rate*100}%</p><div class="mt-4 p-3 bg-blue-100 rounded-md text-center"><p class="text-sm text-blue-800">SỐ THUẾ TNCN PHẢI NỘP</p><p class="text-2xl font-bold text-blue-800">${formatCurrency(tax.toFixed(0))} VND</p></div>`; resultDiv.style.display = 'block'; });
+        document.getElementById('securities-form').addEventListener('submit', function(e) { e.preventDefault(); const value = parseCurrency(document.getElementById('securities-value').value), resultDiv = document.getElementById('securities-result'), tax = value * 0.001; resultDiv.innerHTML = `<h4 class="font-bold text-lg">Kết quả tính thuế:</h4><p class="mt-2 text-sm">Thuế TNCN = ${formatCurrency(value)} × 0.1%</p><div class="mt-4 p-3 bg-blue-100 rounded-md text-center"><p class="text-sm text-blue-800">SỐ THUẾ TNCN PHẢI NỘP</p><p class="text-2xl font-bold text-blue-800">${formatCurrency(tax.toFixed(0))} VND</p></div>`; resultDiv.style.display = 'block'; });
+        document.getElementById('real-estate-form').addEventListener('submit', function(e) { e.preventDefault(); const price = parseCurrency(document.getElementById('real-estate-price').value), isOnlyProperty = document.getElementById('only-property').checked, resultDiv = document.getElementById('real-estate-result'); let tax = 0, explanation = ''; if (isOnlyProperty) { tax = 0; explanation = '<p class="mt-3 text-green-700 font-semibold">Được miễn thuế do đây là nhà đất duy nhất.</p>'; } else { tax = price * 0.02; explanation = `<p class="mt-2 text-sm">Thuế TNCN = ${formatCurrency(price)} × 2%</p>`; } resultDiv.innerHTML = `<h4 class="font-bold text-lg">Kết quả tính thuế:</h4>${explanation}<div class="mt-4 p-3 bg-blue-100 rounded-md text-center"><p class="text-sm text-blue-800">SỐ THUẾ TNCN PHẢI NỘP</p><p class="text-2xl font-bold text-blue-800">${formatCurrency(tax.toFixed(0))} VND</p></div>`; resultDiv.style.display = 'block'; });
+        document.getElementById('capital-form').addEventListener('submit', function(e) { e.preventDefault(); const income = parseCurrency(document.getElementById('capital-income').value), resultDiv = document.getElementById('capital-result'), tax = income * 0.05; resultDiv.innerHTML = `<h4 class="font-bold text-lg">Kết quả tính thuế:</h4><p class="mt-2 text-sm">Thuế TNCN = ${formatCurrency(income)} × 5%</p><div class="mt-4 p-3 bg-blue-100 rounded-md text-center"><p class="text-sm text-blue-800">SỐ THUẾ TNCN PHẢI NỘP</p><p class="text-2xl font-bold text-blue-800">${formatCurrency(tax.toFixed(0))} VND</p></div>`; resultDiv.style.display = 'block'; });
+        document.getElementById('copyright-form').addEventListener('submit', function(e){ e.preventDefault(); const income = parseCurrency(document.getElementById('copyright-income').value), tax = income * 0.05, resultDiv = document.getElementById('copyright-result'); resultDiv.innerHTML = `<h4 class="font-bold text-lg">Kết quả tính thuế:</h4><p class="mt-2 text-sm">Thuế TNCN = ${formatCurrency(income)} × 5%</p><div class="mt-4 p-3 bg-blue-100 rounded-md text-center"><p class="text-sm text-blue-800">SỐ THUẾ TNCN PHẢI NỘP</p><p class="text-2xl font-bold text-blue-800">${formatCurrency(tax.toFixed(0))} VND</p></div>`; resultDiv.style.display = 'block'; });
+        document.getElementById('winnings-form').addEventListener('submit', function(e){ e.preventDefault(); const income = parseCurrency(document.getElementById('winnings-income').value), resultDiv = document.getElementById('winnings-result'); let tax = 0, explanation = ''; if (income > 10000000) { tax = (income - 10000000) * 0.10; explanation = `<p class="mt-2 text-sm">Thuế TNCN = (${formatCurrency(income)} - 10,000,000) × 10%</p>`; } else { explanation = '<p class="mt-3 text-green-700 font-semibold">Không phải nộp thuế do giá trị giải thưởng không vượt quá 10 triệu đồng.</p>'; } resultDiv.innerHTML = `<h4 class="font-bold text-lg">Kết quả tính thuế:</h4>${explanation}<div class="mt-4 p-3 bg-blue-100 rounded-md text-center"><p class="text-sm text-blue-800">SỐ THUẾ TNCN PHẢI NỘP</p><p class="text-2xl font-bold text-blue-800">${formatCurrency(tax.toFixed(0))} VND</p></div>`; resultDiv.style.display = 'block'; });
+        document.getElementById('inheritance-form').addEventListener('submit', function(e){ e.preventDefault(); const value = parseCurrency(document.getElementById('inheritance-value').value), resultDiv = document.getElementById('inheritance-result'); let tax = 0, explanation = ''; if (value > 10000000) { tax = (value - 10000000) * 0.10; explanation = `<p class="mt-2 text-sm">Thuế TNCN = (${formatCurrency(value)} - 10,000,000) × 10%</p>`; } else { explanation = '<p class="mt-3 text-green-700 font-semibold">Không phải nộp thuế do giá trị tài sản không vượt quá 10 triệu đồng.</p>'; } resultDiv.innerHTML = `<h4 class="font-bold text-lg">Kết quả tính thuế:</h4>${explanation}<div class="mt-4 p-3 bg-blue-100 rounded-md text-center"><p class="text-sm text-blue-800">SỐ THUẾ TNCN PHẢI NỘP</p><p class="text-2xl font-bold text-blue-800">${formatCurrency(tax.toFixed(0))} VND</p></div>`; resultDiv.style.display = 'block'; });
+        document.getElementById('non-resident-form').addEventListener('submit', function(e){ e.preventDefault(); const income = parseCurrency(document.getElementById('non-resident-income').value), tax = income * 0.20, resultDiv = document.getElementById('non-resident-result'); resultDiv.innerHTML = `<h4 class="font-bold text-lg">Kết quả tính thuế:</h4><p class="mt-2 text-sm">Thuế TNCN = ${formatCurrency(income)} × 20%</p><div class="mt-4 p-3 bg-blue-100 rounded-md text-center"><p class="text-sm text-blue-800">SỐ THUẾ TNCN PHẢI NỘP</p><p class="text-2xl font-bold text-blue-800">${formatCurrency(tax.toFixed(0))} VND</p></div>`; resultDiv.style.display = 'block'; });
+    </script>
+</body>
+</html>
